@@ -1,5 +1,6 @@
 package com.fastcampus.loan.service;
 
+import static com.fastcampus.loan.dto.ApplyDTO.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -40,7 +41,7 @@ public class ApplyServiceTest {
         .appliedAmount(BigDecimal.valueOf(50000000))
         .build();
 
-    ApplyDTO.Request request = ApplyDTO.Request.builder()
+    Request request = Request.builder()
         .name("Member Kim")
         .cellPhone("010-1111-2222")
         .email("mail@abc.de")
@@ -49,7 +50,7 @@ public class ApplyServiceTest {
 
     when(applicationRepository.save(ArgumentMatchers.any(Apply.class))).thenReturn(entity);
 
-    ApplyDTO.Response actual = applicationService.create(request);
+    Response actual = applicationService.create(request);
 
     assertThat(actual.getName()).isSameAs(entity.getName());
   }
@@ -64,8 +65,30 @@ public class ApplyServiceTest {
 
     when(applicationRepository.findById(findId)).thenReturn(Optional.ofNullable(entity));
 
-    ApplyDTO.Response actual = applicationService.get(1L);
+    Response actual = applicationService.get(1L);
 
     assertThat(actual.getApplyId()).isSameAs(findId);
+  }
+
+  @Test
+  void Should_ReturnUpdatedResponseOfExistApplicationEntity_When_RequestUpdateExistApplicationInfo() {
+    Long findId = 1L;
+
+    Apply entity = Apply.builder()
+        .applyId(1L)
+        .name("Member Kim")
+        .build();
+
+    Request request = Request.builder()
+        .name("Member Lee")
+        .build();
+
+    when(applicationRepository.save(ArgumentMatchers.any(Apply.class))).thenReturn(entity);
+    when(applicationRepository.findById(findId)).thenReturn(Optional.ofNullable(entity));
+
+    Response actual = applicationService.update(findId, request);
+
+    assertThat(actual.getApplyId()).isSameAs(findId);
+    assertThat(actual.getName()).isSameAs(request.getName());
   }
 }
