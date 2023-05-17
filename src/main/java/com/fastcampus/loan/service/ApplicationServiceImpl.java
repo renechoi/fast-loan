@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.fastcampus.loan.domain.Apply;
 import com.fastcampus.loan.dto.ApplyDTO;
+import com.fastcampus.loan.exception.BaseException;
+import com.fastcampus.loan.exception.ResultType;
 import com.fastcampus.loan.repository.ApplyRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,5 +29,14 @@ public class ApplicationServiceImpl implements ApplicationService {
     Apply applied = applyRepository.save(apply);
 
     return modelMapper.map(applied, ApplyDTO.Response.class);
+  }
+
+  @Override
+  public ApplyDTO.Response get(Long applicationId) {
+    Apply apply = applyRepository.findById(applicationId).orElseThrow(() -> {
+      throw new BaseException(ResultType.SYSTEM_ERROR);
+    });
+
+    return modelMapper.map(apply, ApplyDTO.Response.class);
   }
 }
