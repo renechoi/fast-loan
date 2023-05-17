@@ -2,10 +2,13 @@ package com.fastcampus.loan.service;
 
 import static com.fastcampus.loan.dto.ApplyDTO.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
@@ -19,6 +22,7 @@ import com.fastcampus.loan.exception.BaseException;
 import com.fastcampus.loan.exception.ResultType;
 import com.fastcampus.loan.repository.AcceptTermsRepository;
 import com.fastcampus.loan.repository.ApplyRepository;
+import com.fastcampus.loan.repository.JudgmentRepository;
 import com.fastcampus.loan.repository.TermsRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 	private final ApplyRepository applyRepository;
 	private final TermsRepository termsRepository;
+	private final JudgmentRepository judgmentRepository;
 
 	private final AcceptTermsRepository acceptTermsRepository;
 
@@ -113,5 +118,28 @@ public class ApplicationServiceImpl implements ApplicationService {
 		}
 
 		return true;
+	}
+
+	@Transactional
+	@Override
+	public Response contract(Long applicationId) {
+		Apply application = applyRepository.findById(applicationId).orElseThrow(() -> {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		});
+
+		judgmentRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		});
+
+		if (application.getApprovalAmount() == null
+			|| application.getApprovalAmount().compareTo(BigDecimal.ZERO) == 0) {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		}
+
+		application.setContractAt(LocalDateTime.now());
+
+		Apply updated = applyRepository.save(application);
+
+		return modelMapper.map(updated, Response.class);
 	}
 }
