@@ -7,6 +7,7 @@ import com.fastcampus.loan.dto.ResponseDTO;
 import com.fastcampus.loan.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,5 +36,11 @@ public class ApplyController extends AbstractController {
   @PutMapping("/{applicationId}")
   public ResponseDTO<Response> update(@PathVariable Long applicationId, @RequestBody Request request) {
     return ok(applicationService.update(applicationId, request));
+  }
+
+  @DeleteMapping("/{applicationId}")
+  public ResponseDTO<Void> delete(@PathVariable Long applicationId) {
+    applicationService.delete(applicationId);
+    return ok();
   }
 }
