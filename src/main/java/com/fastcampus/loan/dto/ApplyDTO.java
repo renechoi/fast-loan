@@ -3,6 +3,8 @@ package com.fastcampus.loan.dto;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,5 +51,13 @@ public class ApplyDTO implements Serializable {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+  }
+
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  public static class AcceptTerms {
+    List<Long> acceptTermsIds;
   }
 }

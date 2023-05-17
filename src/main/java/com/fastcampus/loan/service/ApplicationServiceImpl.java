@@ -3,14 +3,23 @@ package com.fastcampus.loan.service;
 import static com.fastcampus.loan.dto.ApplyDTO.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fastcampus.loan.domain.AcceptTerms;
 import com.fastcampus.loan.domain.Apply;
+import com.fastcampus.loan.domain.Terms;
+import com.fastcampus.loan.dto.ApplyDTO;
 import com.fastcampus.loan.exception.BaseException;
 import com.fastcampus.loan.exception.ResultType;
+import com.fastcampus.loan.repository.AcceptTermsRepository;
 import com.fastcampus.loan.repository.ApplyRepository;
+import com.fastcampus.loan.repository.TermsRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +28,9 @@ import lombok.RequiredArgsConstructor;
 public class ApplicationServiceImpl implements ApplicationService {
 
 	private final ApplyRepository applyRepository;
+	private final TermsRepository termsRepository;
+
+	private final AcceptTermsRepository acceptTermsRepository;
 
 	private final ModelMapper modelMapper;
 
@@ -66,5 +78,40 @@ public class ApplicationServiceImpl implements ApplicationService {
 		application.setIsDeleted(true);
 
 		applyRepository.save(application);
+	}
+
+	@Override
+	public Boolean acceptTerms(Long applicationId, ApplyDTO.AcceptTerms dto) {
+		applyRepository.findById(applicationId).orElseThrow(() -> {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		});
+
+		List<Terms> termsList = termsRepository.findAll(Sort.by(Sort.Direction.ASC, "termsId"));
+		if (termsList.isEmpty()) {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		}
+
+		List<Long> acceptTermsIds = dto.getAcceptTermsIds();
+		if (termsList.size() != acceptTermsIds.size()) {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		}
+
+		List<Long> termsIds = termsList.stream().map(Terms::getTermsId).collect(Collectors.toList());
+		Collections.sort(acceptTermsIds);
+
+		if (!termsIds.containsAll(acceptTermsIds)) {
+			throw new BaseException(ResultType.SYSTEM_ERROR);
+		}
+
+		for (Long termsId : acceptTermsIds) {
+			AcceptTerms accepted = AcceptTerms.builder()
+				.termsId(termsId)
+				.applicationId(applicationId)
+				.build();
+
+			acceptTermsRepository.save(accepted);
+		}
+
+		return true;
 	}
 }
