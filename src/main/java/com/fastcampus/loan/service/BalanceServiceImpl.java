@@ -72,6 +72,30 @@ public class BalanceServiceImpl implements BalanceService {
   }
 
   @Override
+  public Response repaymentUpdate(Long applicationId, RepaymentRequest request) {
+    Balance balance = balanceRepository.findByApplicationId(applicationId).orElseThrow(() -> {
+      throw new BaseException(ResultType.SYSTEM_ERROR);
+    });
+
+    BigDecimal updatedBalance = balance.getBalance();
+    BigDecimal repaymentAmount = request.getRepaymentAmount();
+
+    // 상환 정상: balance - repaymentAmount
+    // 상환금 롤백 : balance + repaymentAmount
+    if (request.getType().equals(RepaymentRequest.RepaymentType.ADD)) {
+      updatedBalance = updatedBalance.add(repaymentAmount);
+    } else {
+      updatedBalance = updatedBalance.subtract(repaymentAmount);
+    }
+
+    balance.setBalance(updatedBalance);
+
+    Balance updated = balanceRepository.save(balance);
+
+    return modelMapper.map(updated, Response.class);
+  }
+
+  @Override
   public void delete(Long applicationId) {
     Balance balance = balanceRepository.findAllByApplicationId(applicationId).orElseThrow(() -> {
       throw new BaseException(ResultType.SYSTEM_ERROR);

@@ -11,4 +11,6 @@ import com.fastcampus.loan.domain.Balance;
 public interface BalanceRepository extends JpaRepository<Balance, Long> {
 
   Optional<Balance> findAllByApplicationId(Long applicationId);
+
+  Optional<Balance> findByApplicationId(Long applicationId);
 }

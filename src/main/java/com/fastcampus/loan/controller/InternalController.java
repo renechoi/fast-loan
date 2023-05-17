@@ -1,10 +1,14 @@
 package com.fastcampus.loan.controller;
 
-import com.fastcampus.loan.dto.ExecutionDTO.Request;
-import com.fastcampus.loan.dto.ExecutionDTO.Response;
-import com.fastcampus.loan.dto.ExecutionDTO.UpdateResponse;
+import static com.fastcampus.loan.dto.ExecutionDTO.*;
+
+import com.fastcampus.loan.dto.ExecutionDTO;
+import com.fastcampus.loan.dto.RepaymentDTO;
+import com.fastcampus.loan.dto.RepaymentDTO.ListResponse;
 import com.fastcampus.loan.dto.ResponseDTO;
 import com.fastcampus.loan.service.EntryService;
+import com.fastcampus.loan.service.RepaymentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +26,8 @@ public class InternalController extends AbstractController {
 
   private final EntryService entryService;
 
+  private final RepaymentService repaymentService;
+
   @PostMapping("{applicationId}/entries")
   public ResponseDTO<Response> create(@PathVariable Long applicationId, @RequestBody Request request) {
     return ok(entryService.create(applicationId, request));
@@ -32,14 +38,36 @@ public class InternalController extends AbstractController {
     return ok(entryService.update(applicationId, request));
   }
 
-  @GetMapping("/{applicationId}/entries")
-  public ResponseDTO<Response> get(@PathVariable Long applicationId) {
-    return ok(entryService.get(applicationId));
+  @GetMapping("/entries/{entryId}")
+  public ResponseDTO<Response> get(@PathVariable Long entryId) {
+    return ok(entryService.get(entryId));
   }
 
-  @DeleteMapping("/{applicationId}/entries")
-  public ResponseDTO<Void> delete(@PathVariable Long applicationId) {
-    entryService.delete(applicationId);
+  @DeleteMapping("/entries/{entryId}")
+  public ResponseDTO<Void> delete(@PathVariable Long entryId) {
+    entryService.delete(entryId);
+    return ok();
+  }
+
+  @PostMapping("{applicationId}/repayments")
+  public ResponseDTO<RepaymentDTO.Response> create(@PathVariable Long applicationId, @RequestBody RepaymentDTO.Request request) {
+    return ok(repaymentService.create(applicationId, request));
+  }
+
+  @GetMapping("{applicationId}/repayments")
+  public ResponseDTO<List<ListResponse>> getPayments(@PathVariable Long applicationId) {
+    return ok(repaymentService.get(applicationId));
+  }
+
+  @PutMapping("/repayments/{repaymentId}")
+  public ResponseDTO<RepaymentDTO.UpdateResponse> update(@PathVariable Long repaymentId,
+      @RequestBody RepaymentDTO.Request request) {
+    return ok(repaymentService.update(repaymentId, request));
+  }
+
+  @DeleteMapping("/repayments/{repaymentId}")
+  public ResponseDTO<Void> deleteRepayment(@PathVariable Long repaymentId) {
+    repaymentService.delete(repaymentId);
     return ok();
   }
 }

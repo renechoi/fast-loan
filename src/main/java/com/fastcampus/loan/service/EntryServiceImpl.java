@@ -55,7 +55,7 @@ public class EntryServiceImpl implements EntryService {
 
   @Override
   public Response get(Long applicationId) {
-    Execution execution = executionRepository.findByApplicationId(applicationId);
+    Optional<Execution> execution = executionRepository.findByApplicationId(applicationId);
 
     return modelMapper.map(execution, Response.class);
   }
