@@ -6,6 +6,7 @@ import com.fastcampus.loan.dto.ResponseDTO;
 import com.fastcampus.loan.service.CounselService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,5 +35,11 @@ public class CounselController extends AbstractController {
 	@PutMapping("/{counselId}")
 	public ResponseDTO<Response> update(@PathVariable Long counselId, @RequestBody Request request) {
 		return ok(counselService.update(counselId, request));
+	}
+
+	@DeleteMapping("/{counselId}")
+	public ResponseDTO<Void> delete(@PathVariable Long counselId) {
+		counselService.delete(counselId);
+		return ok();
 	}
 }
